@@ -1,7 +1,7 @@
 
     
   Title:        Automated Market Maker on XRPL
-  Revision:     3 (2023-06-20)
+  Revision:     4 (2023-08-04)
 
   Author:       Aanchal Malhotra
                 David J. Schwartz
@@ -102,7 +102,7 @@ Our Approach: Create a mechanism that makes it:
 
 Easy (higher success probability) for arbitrageurs by eliminating the race condition, AND
 Profitable for liquidity providers by further narrowing the window of decreased trading volume for the pool and sharing the profits from arbitrage transaction
-Our Innovative Solution: To achieve the abovementionedabove mentioned, we introduce a mechanism for the AMM instance to continuously auction-off trading advantages for a 24-hour slot at zero trading fee! Anyone can bid for the auction slot with the units of LPtokens. The slot-holder can send the arbitrage transaction immediately without the need to wait for their profits to exceed the trading fee, thus eliminating the race condition for them. This also reduces the time window for which the pool suffers decreased trading volume. Additionally, part of proceeds (LPTokens) from the auction are deleted/burnt that effectively increases LP token holders' ownership in the pool proportionally. Since it's a continuous auction mechanism, if someone outbids an auction slot-holder, part of proceeds from the auction are refunded to the previous slot-holder (computed pro-rata). For details refer Section 5.
+Our Innovative Solution: To achieve the above mentioned, we introduce a mechanism for the AMM instance to continuously auction-off trading advantages for a 24-hour slot at zero trading fee! Anyone can bid for the auction slot with the units of LPtokens. The slot-holder can send the arbitrage transaction immediately without the need to wait for their profits to exceed the trading fee, thus eliminating the race condition for them. This also reduces the time window for which the pool suffers decreased trading volume. Additionally, part of proceeds (LPTokens) from the auction are deleted/burnt that effectively increases LP token holders' ownership in the pool proportionally. Since it's a continuous auction mechanism, if someone outbids an auction slot-holder, part of proceeds from the auction are refunded to the previous slot-holder (computed pro-rata). For details refer Section 5.
 
 As slot holder will have significant advantages for arbitrage, it’s expected that arbitrageurs will bid up the price of the auction slot to nearly the value they extract through arbitrage.
 
@@ -165,15 +165,15 @@ AMMCreate is not allowed with LPTokens
 AMMCreate is not allowed if the token’s issuer has DefaultRipple flag disabled.
 2.2.1. Transaction fields for AMMCreate transaction
 Field Name	Required?	JSON Type	Internal Type
-TransactionType	✔️✔️	string	UINT16
+TransactionType	✔️	string	UINT16
 TransactionType specifies the new transaction type AMMCreate. The integer value is 35.
 
 Field Name	Required?	JSON Type	Internal Type
-Fee	✔️✔️	string	AMOUNT
+Fee	✔️	string	AMOUNT
 Fee specifies the integer amount of XRP, in drops, to be destroyed as a cost of creating an AMM instance. We DO NOT propose to keep a reserve for the AMM instance.
 
 Field Name	Required?	JSON Type	Internal Type
-Amount	✔️✔️	string or object	AMOUNT
+Amount	✔️	string or object	AMOUNT
 Amount specifies one of the pool assets (XRP or token) of the AMM instance.
 
 Field Name	Required?	JSON Type	Internal Type
@@ -183,7 +183,7 @@ Amount2 specifies the other pool asset of the AMM instance.
 Both Amount and Amount2 that represent issued assets MUST have value subfields specified.
 
 Field Name	Required?	JSON Type	Internal Type
-TradingFee	✔️✔️	number	UINT16
+TradingFee	✔️	number	UINT16
 TradingFee specifies the fee, in basis point, to be charged to the traders for the trades executed against the AMM instance. Trading fee is a percentage of the trading volume. Valid values for this field are between 0 and 1000 inclusive. A value of 1 is equivalent to 1/10 bps or 0.001%, allowing trading fee between 0% and 1%.
 
 The AMMCreate transaction MUST fail if the account issuing this transaction:
@@ -249,15 +249,15 @@ all assets liquidity provision
 single asset liquidity provision
 2.3.1.1 Fields for AMMDeposit transaction
 Field Name	Required?	JSON Type	Internal Type
-TransactionType	✔️✔️	string	UINT16
+TransactionType	✔️	string	UINT16
 TransactionType specifies the new transaction type AMMDeposit. The integer value is 36.
 
 Field Name	Required?	JSON Type	Internal Type
-Asset	✔️✔️	object	ISSUE
+Asset	✔️	object	ISSUE
 Asset specifies one of the assets of the AMM instance against which the transaction is to be executed. The ISSUE object may have the following subfields:
 
 Field name	Required?	Description
-issuer	✔️✔️	specifies the unique XRPL account address of the entity issuing the currency
+issuer	✔️	specifies the unique XRPL account address of the entity issuing the currency
 currency	✔️	arbitrary code for currency to issue
 If the asset is XRP, then the issuer subfield is not mentioned.
 
@@ -267,11 +267,11 @@ Asset2 specifies the other asset of the AMM instance against which the transacti
 
 Field Name	Required?	JSON Type	Internal Type
 Amount		string or object	AMOUNT
-Amount specifies one of the pools assets that the trader is willing to addthe amount of one of the pools assets. If the asset is XRP, then the Amount is a string specifying the number of drops. Otherwise it is an object with the following subfields:
+Amount specifies the amount of one of the pools assets. If the asset is XRP, then the Amount is a string specifying the number of drops. Otherwise it is an object with the following subfields:
 
 Field name	Required?	Description
 issuer	✔️	specifies the unique XRPL account address of the entity issuing the currency
-currency	✔️✔️	arbitrary code for currency to issue
+currency	✔️	arbitrary code for currency to issue
 value		specifies the maximum amount of this currency, in decimal representation, that the trader is willing to add
 Field Name	Required?	JSON Type	Internal Type
 Amount2		string or object	AMOUNT
@@ -286,7 +286,7 @@ EPrice is an invalid field for all assets deposits. It should only be specified 
 
 Field Name	Required?	JSON Type	Internal Type
 LPTokenOut		string	AMOUNT
-LPTokensOutLPTokenOut specifies the amount of shares of the AMM instance pools that the trader wants to buy.
+LPTokenOut specifies the amount of shares of the AMM instance pools.
 
 Let the following represent the pool composition of AMM instance before trade:
 
@@ -332,8 +332,6 @@ Also let
 
  
  
- 
- 
 , then
  
  
@@ -352,7 +350,7 @@ Following is the updated pool composition of the AMM instance after successful t
 : Current new balance of asset 
 : Current new balance of outstanding LPTokens
 2.3.1.4. Specifying different parameters
-The proposal allows for traders to specify different combinations of the abovementionedabove mentioned fields for AMMDeposit transaction. The implementation will determine the best possible suboperationssub operations based on trader's specifications.
+The proposal allows for traders to specify different combinations of the above mentioned fields for AMMDeposit transaction. The implementation will determine the best possible sub operations based on trader's specifications.
 We introduce the following six flags to the AMMDeposit transaction to identify valid parameter combinations.
 
 Flag Name	Hex Value	Description
@@ -371,30 +369,25 @@ Amount and LPTokenOut
 Amount and EPrice
 Details for above combinations:
 
-Fields specified: LPTokenOut, [Amount], [Amount2]
 Fields specified: LPTokenOut, [Amount], [Amount2] and Flag: tfLPToken
 Such a transaction assumes proportional deposit of pools assets in exchange for the specified amount of LPTokenOut of the AMM instance. Amount and Amount2, if included, have to be provided both and specify minimum deposit amounts for each asset.
 Deposit fails if the min deposit condition is not met
 
-Fields specified: Amount, [LPTokenOut]
 Fields specified: Amount, [LPTokenOut] and Flag: tfSingleAsset
 Such a transaction assumes single asset deposit of the amount of asset specified by Amount. This is essentially an equal asset deposit and a swap.
 
 If the asset to be deposited is a token, specifying the value field is required, else the transaction will fail.
 
-LPTokenOut, if included, specified minimum LPTokens amount that the user recievesreceives, else the transaction will fail.
+LPTokenOut, if included, specified minimum LPTokens amount that the user receives, else the transaction will fail.
 
-Fields specified: Amount and Amount2
 Fields specified: Amount, Amount2, [LPTokenOut] and Flag: tfTwoAsset
 Such a transaction assumes proportional deposit of pool assets with the constraints on the maximum amount of each asset that the trader is willing to deposit.
 
-LPTokenOut, if included, specified minimum LPTokens amount that the user recievesreceives, else the transaction will fail.
+LPTokenOut, if included, specified minimum LPTokens amount that the user receives, else the transaction will fail.
 
-Fields specified: Amount and LPTokenOut
 Fields specified: Amount and LPTokenOut and Flag: tfOneAssetLPToken
 Such a transaction assumes that a single asset Amount is deposited to obtain some share of the AMM instance's pools represented by amount of LPTokenOut. Since adding liquidity to the pool with one asset changes the ratio of the assets in the two pools, thus changing the relative pricing, trading fee is charged only on the amount of the deposited asset that causes this change.
 
-Fields specified: Amount and EPrice
 Fields specified: Amount and EPrice and Flag: tfLimitLPToken
 Such a transaction assumes single asset deposit with the following two constraints:
 
@@ -404,7 +397,7 @@ b. The effective-price of the LPTokenOut traded out does not exceed the specifie
 
 Following updates after a successful AMMDeposit transaction:
 
-The deposited asset, if XRP, is transferred from the account that inititaated the transaction to the AMM instance account, thus changing the Balance field of each account
+The deposited asset, if XRP, is transferred from the account that initiated the transaction to the AMM instance account, thus changing the Balance field of each account
 The deposited asset, if tokens, are balanced between the AMM account and the issuer account trustline.
 The LPTokenOut ~ 
  are issued by the AMM instance account to the account that initiated the transaction and a new trustline is created, if there does not exist one.
@@ -418,15 +411,15 @@ all assets liquidity withdrawal
 single asset liquidity withdrawal
 2.3.2.1 Fields
 Field Name	Required?	JSON Type	Internal Type
-TransactionType	✔️✔️	string	UINT16
+TransactionType	✔️	string	UINT16
 TransactionType specifies the new transaction type AMMWithdraw. The integer value is 37.
 
 Field Name	Required?	JSON Type	Internal Type
-Asset	✔️✔️	object	ISSUE
+Asset	✔️	object	ISSUE
 Asset specifies one of the assets of the AMM instance against which the transaction is to be executed.
 
 Field Name	Required?	JSON Type	Internal Type
-Asset2	✔️✔️	object	ISSUE
+Asset2	✔️	object	ISSUE
 Asset2 specifies the other asset of the AMM instance against which the transaction is to be executed.
 
 Field Name	Required?	JSON Type	Internal Type
@@ -434,7 +427,7 @@ Amount		object or string	AMOUNT
 Amount specifies one of the pools assets that the trader wants to remove. If the asset is XRP, then the Amount is a string specifying the number of drops. Otherwise it is an object with the following subfields:
 
 Field name	Required?	Description
-issuer	✔️✔️	specifies the XRPL address of the issuer of the currency
+issuer	✔️	specifies the XRPL address of the issuer of the currency
 currency	✔️	specifies the currency code of the issued currency
 value		specifies the minimum amount of this asset that the trader is willing to withdraw.
 Field Name	Required?	JSON Type	Internal Type
@@ -487,12 +480,11 @@ Following is the updated pool composition of the AMM instance after successful t
 : Current new balance of asset 
 : Current new balance of outstanding LPTokens
 2.3.2.2. Single asset withdrawal
-Single asset withdrawal can be conceptualized as two subtradessub trades of equal asset withdrawal and a swap. Let asset 
+Single asset withdrawal can be conceptualized as two sub trades of equal asset withdrawal and a swap. Let asset 
 
 be the only asset being withdrawn to redeem 
  and let
 
- 
  
 , then
  
@@ -507,9 +499,9 @@ Following is the updated pool composition of the AMM instance after successful t
 : Current new balance of asset 
 : Current new balance of outstanding LPTokens
 2.3.2.3. Specifying different parameters
-The proposal allows for traders to specify different combinations of the abovementionedabove mentioned fields for AMMWithdraw transaction. The implementation will figure out the best possible operations based on trader's specifications.
+The proposal allows for traders to specify different combinations of the above mentioned fields for AMMWithdraw transaction. The implementation will figure out the best possible operations based on trader's specifications.
 
-We introduce the following six transaction flags to the AMMWithdraw transaction to indentifyidentify valid parameter combinations. Other invalid combinations may result in the failure of transaction.
+We introduce the following six transaction flags to the AMMWithdraw transaction to identify valid parameter combinations. Other invalid combinations may result in the failure of transaction.
 
 Flag Name	Hex Value	Description
 tfLPToken	0x00010000	If set, it indicates LPTokenIn field parameter
@@ -543,7 +535,7 @@ Such a transaction assumes withdrawal of single asset with the following constra
 
 a. amount of asset1 if specified in Amount specifies the minimum amount of asset1 that the trader is willing to withdraw
 
-b. The effective price of asset traded out doesnotdoes not exceed the amount specified in EPrice
+b. The effective price of asset traded out does not exceed the amount specified in EPrice
 
 Following updates after a successful transaction:
 
@@ -572,8 +564,7 @@ Let the following represent the balances of assets
 : Balance of asset 
  being swapped into the AMM instance's pool
 We can compute 
-,
-given 
+, given 
  and 
  as follows:
 
@@ -582,19 +573,20 @@ given
  
 
 Similarly, we can compute 
-,
-given 
+, given 
  and 
  as follows:
 
-$$\Delta_{B}= \Gamma_{B} \left[ \left( \frac{\Gamma_{A}}{\Gamma_{A}- \Delta_{A}} \right) ^ \frac{W_A}{W_B}-1 \right] \frac{1}{1-TFee} \tag{10}$$
+ 
+ 
+ 
+ 
 
 To change the spot-price of token 
- traded out relative to token
+ traded out relative to token 
  traded into the pool from 
  to 
-,
-required 
+, required 
  can be computed as follows:
 
  
@@ -618,7 +610,8 @@ We can compute the average slippage
 
 where 
 , the slippage slope is the derivative of the slippage when the traded amount tends to zero.
-$$ SS_{A} = \frac{W_{A} + W_{B}}{2 * \Gamma_{B} * W_{A}} \tag{15}$$
+ 
+ 
 
 The following is the updated pool composition after a successful transaction:
 
@@ -654,10 +647,15 @@ $$ SendMax = X * Amount$$
 
 where X is equal to the LimitSpotPrice for the trade, i.e. the threshold on the spot-price of asset out after trade.
 
+2.4.3. Transfer Fee
+We propose that the transfer fee is not applied to AMMCreate, AMMDeposit and AMMWithdraw transactions.
+
+AMM instance never pays the transfer fee. Transfer Fee will automatically apply to Payments transaction and conditionally in offer-crossing through OfferCreate.
+
 3. Governance: Trading Fee Voting Mechanism
 This proposal allows for the TradingFee of the AMM instance be a votable parameter. Any account that holds the corresponding LPTokens can cast a vote using the new AMMVote transaction.
 
-We introduce a new field VoteSlots associated with each AMM instance in the AMM ledger entry. The VoteSlots field keeps a track of uptoup to eight active votes for the instance.
+We introduce a new field VoteSlots associated with each AMM instance in the AMM ledger entry. The VoteSlots field keeps a track of up to eight active votes for the instance.
 
 Field Name	Required?	JSON Type	Internal Type
 VoteSlots		array	ARRAY
@@ -667,7 +665,7 @@ VoteSlots is an array of VoteEntry objects representing the LPs and their vote o
 Each member of the VoteSlots field is an object that describes the vote for the trading fee by the LP of that instance. A VoteEntry object has the following fields:
 
 Field Name	Required?	JSON Type	Internal Type
-Account	✔️✔️	string	AccountID
+Account	✔️	string	AccountID
 Account specifies the XRPL address of the LP.
 
 Field Name	Required?	JSON Type	Internal Type
@@ -675,7 +673,7 @@ TradingFee	✔️	number	UINT16
 TradingFee specifies the fee, in basis point. Valid values for this field are between 0 and 1000 inclusive. A value of 1 is equivalent to 1/10 bps or 0.001%, allowing trading fee between 0% and 1%.
 
 Field Name	Required?	JSON Type	Internal Type
-VoteWeight	✔️✔️	number	UINT32
+VoteWeight	✔️	number	UINT32
 VoteWeight specifies the LPTokens owned by the account that issued the transaction. It is specified in basis points. Valid values for this field are between 0 and 100000. A value of 1 is equivalent to 1/10 bps or 0.001%, allowing the percentage ownership in the instance between 0% and 100%.
 
 TradingFee for the AMM instance is computed as the weighted mean of all the current votes in the VoteSlots field.
@@ -695,7 +693,7 @@ Account	✔️	string	AccountID
 Account specifies the XRPL account that submits the transaction.
 
 Field Name	Required?	JSON Type	Internal Type
-TransactionType	✔️✔️	string	UINT16
+TransactionType	✔️	string	UINT16
 TransactionType specifies the new transaction type AMMVote. The integer value is 38.
 
 Field Name	Required?	JSON Type	Internal Type
@@ -759,7 +757,7 @@ Slot Price = M
 
 II. Slot state - Occupied, then
 
-Let the price at which the slot is bought be B - specified in Amount of LPTokens. Let t represent the fraction of used slot time for the current slot-holder. Note that for each interval t has a dicretediscrete value (0.05, 0.1, , ..., 1). Let M represent the minimum slot price.
+Let the price at which the slot is bought be B - specified in Amount of LPTokens. Let t represent the fraction of used slot time for the current slot-holder. Note that for each interval t has a discrete value (0.05, 0.1, , ..., 1). Let M represent the minimum slot price.
 
 Interval	t
 (0,1]	0.05
@@ -778,7 +776,7 @@ The revenue from a successful AMMBid transaction is split between the current sl
 $$ f(t) = (1-t)*B $$
 The remaining LPTokens are burnt/deleted, effectively increasing the LPs share in the pool.
 
-Let X represent the minimum bid price computed by the price-scheduling algortiithm, then,
+Let X represent the minimum bid price computed by the price-scheduling algorithm, then,
 If (MinBidPrice && MaxBidPrice):
 return
 If (MinBidPrice):m
@@ -811,7 +809,7 @@ Price represents the price paid for the slot specified in units of LPTokens of t
 
 Field Name	Required?	JSON Type	Internal Type
 AuthAccounts		array	Array
-AuthAccounts represents an array of XRPL account IDs that are authorized to trade at the discounted fee against the AMM instance. The proposal allows for uptoup to a maximum of four accounts.
+AuthAccounts represents an array of XRPL account IDs that are authorized to trade at the discounted fee against the AMM instance. The proposal allows for up to a maximum of four accounts.
 
 4.1.3. AMMBid transaction
 We introduce a new transaction AMMBid to place a bid for the auction slot. The transaction may have the following optional and required fields:
@@ -834,11 +832,11 @@ Asset2 specifies the other asset of the AMM instance against which the transacti
 
 Field Name	Required?	JSON Type	Internal Type
 MinBidPrice		string	STRING NUMBER
-MinBidPrice represents the minimum price that the bidder wants to pay for the slot. It is specified in units of LPTokens. This is not a required field. If specified let MinBidPrice be X and let the slot-price computed by price scheduling slgorithmalgorithm be Y, then bidder always pays the max(X, Y).
+MinBidPrice represents the minimum price that the bidder wants to pay for the slot. It is specified in units of LPTokens. This is not a required field. If specified let MinBidPrice be X and let the slot-price computed by price scheduling algorithm be Y, then bidder always pays the max(X, Y).
 
 Field Name	Required?	JSON Type	Internal Type
 AuthAccounts		array	Array
-AuthAccounts represents an array of XRPL account IDs that are authorized to trade at the discounted fee against the AMM instance. The proposal allows for uptoup to a maximum of four accounts.
+AuthAccounts represents an array of XRPL account IDs that are authorized to trade at the discounted fee against the AMM instance. The proposal allows for up to a maximum of four accounts.
 
 Field Name	Required?	JSON Type	Internal Type
 MaxBidPrice		string	STRING NUMBER
@@ -846,7 +844,7 @@ MaxBidPrice represents the maximum price that the bidder wants to pay for the sl
 
 Appendices
 Appendix A. Specifying different parameters for AMMDeposit transaction
-The proposal allows for traders to specify different combinations of the fields for AMMDeposit transaction. The implementation will figure out the best possible suboperationssub operations based on trader's specifications. Here are the recommended valid combinations. Other invalid combinations may result in the failure of transaction.
+The proposal allows for traders to specify different combinations of the fields for AMMDeposit transaction. The implementation will figure out the best possible sub operations based on trader's specifications. Here are the recommended valid combinations. Other invalid combinations may result in the failure of transaction.
 
 LPTokenOut, [Amount], [Amount2]
 Amount, [LPTokenOut]
@@ -860,7 +858,7 @@ Such a transaction assumes proportional deposit of pools assets in exchange for 
 
 Use equations 1 & 2 to compute the amount of each asset to be deposited, given the amount of 
  specified as LPTokenOut
-If the account that intitiatedinitiated the transaction holds sufficient balances, the transaction is successful. It fails otherwise with an error code.
+If the account that initiated the transaction holds sufficient balances, the transaction is successful. It fails otherwise with an error code.
 
 Similarly, if [Amount], [Amount2] are specified and the amount of either asset computed above is less than the amounts specified in these fields, then the transaction fails.
 
@@ -931,7 +929,7 @@ The deposited asset, if token, are balanced between the AMM account and the issu
 The LPTokenOut are issued by the AMM instance account to the account that initiated the transaction and a new trustline is created, if there does not exist one.
 The pool composition is updated. Note that the conservation function is not preserved in case of liquidity provision (and is not expected to.)
 Appendix B. Specifying different parameters for AMMWithdraw transaction
-The proposal allows for traders to specify different combinations of the abovementionedabove mentioned fields for AMMWithdraw transaction. The implementation will figure out the best possible operations based on trader's specifications. Here are the recommended possible combinations. Other invalid combinations may result in the failure of transaction.
+The proposal allows for traders to specify different combinations of the above mentioned fields for AMMWithdraw transaction. The implementation will figure out the best possible operations based on trader's specifications. Here are the recommended possible combinations. Other invalid combinations may result in the failure of transaction.
 
 LPTokenIn
 Amount
@@ -974,7 +972,7 @@ Use equation 6 to compute the amount of asset1, given
 The amount of asset2 to be withdrawn is the one specified in Amount2
 The amount of asset1 to be withdrawn is W
 The amount of LPTokenIn redeemed is Q
-The transaction MUST fail if the account inititainginitiating the transaction does not hold the amount of LPTokenIn computed above.
+The transaction MUST fail if the account initiating the transaction does not hold the amount of LPTokenIn computed above.
 
 Fields specified: Amount and LPTokenIn
 Such a transaction assumes withdrawal of single asset specified in Amount proportional to the share represented by the amount of LPTokenIn. Since a single sided withdrawal changes the ratio of the two assets in the AMM instance pools, thus changing their relative pricing, trading fee is charged on the amount of asset1 that causes that change.
@@ -983,7 +981,7 @@ Check if the account that initiated the transaction holds the amount of LPTokenI
 If not, the transaction fails with an error code. Otherwise,
 Use equation 8 to compute the amount of asset1, given the redeemed 
  represented by LPTokenIn. Let this be Y.
-If (amount exists for Amount & Y >= amount in Amount) || (amount field doesnotdoes not exist for Amount):
+If (amount exists for Amount & Y >= amount in Amount) || (amount field does not exist for Amount):
 The amount of asset out is Y
 The amount of LPTokens redeemed is LPTokenIn
 else transaction fails.
@@ -993,12 +991,12 @@ Such a transaction assumes withdrawal of single asset with the following constra
 
 a. amount of asset1 if specified in Amount specifies the minimum amount of asset1 that the trader is willing to withdraw
 
-b. The effective price of asset traded out doesnotdoes not exceed the amount specified in EPrice
+b. The effective price of asset traded out does not exceed the amount specified in EPrice
 
 Use equations 8 & III and amount in EPriceto compute the two variables, i.e.,
 asset in as LPTokenIn. Let this be X
 asset out as that in Amount. Let this be Y
-If (amount exists for Amount & Y >= amount in Amount) || (amount field doesnotdoes not exist for Amount):
+If (amount exists for Amount & Y >= amount in Amount) || (amount field does not exist for Amount):
 The amount of assetOut is given by Y
 The amount of LPTokens is given by X
 else transaction fails.
